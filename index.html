@@ -1,0 +1,68 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crivellaro Diego</title>
+<style>
+        /* Stile per il testo scorrevole */
+        #scroller {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f0f0f0;
+            padding: 5px;
+        }
+
+</style>
+    <script src="http://20.224.60.135/voce/socket.io.js"></script>
+
+</head>
+<body>
+    <h1>Riconoscitore vocale</h1>
+    <button onclick="startRecording()">Avvia</button>
+    <button onclick="stopRecording()">Ferma</button>
+    <div id="Riconosciuto"></div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = function (event) {
+            var transcript = event.results[0][0].transcript;
+            document.getElementById('Riconosciuto').innerHTML = 'Riconosciuto: ' + transcript;
+            socket.emit('audio', transcript);
+        };
+
+        recognition.onerror = function (event) {
+            console.error('Errore durante il riconoscimento vocale: ', event.error);
+        };
+
+        function startRecording() {
+            recognition.start();
+        }
+
+        function stopRecording() {
+            recognition.stop();
+        }
+
+        // Gestione della risposta dal server dopo l'elaborazione del testo
+        socket.on('text_processed', function(data) {
+            alert(data.message); // Puoi aggiornare questa parte con il tuo modo preferito di gestire la risposta
+        });
+    </script>
+        <!-- Spazio vuoto -->
+    <div id="empty-space" style="height: 30px;"></div>
+
+
+    <!-- Testo scorrevole -->
+    <div id="scroller">
+        <marquee behavior="scroll" direction="left">Crivellaro</marquee>
+    </div>
+</body>
+</html>
